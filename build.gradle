@@ -18,10 +18,11 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
-    dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
         runtimeOnly 'org.postgresql:postgresql'
 
@@ -29,14 +30,36 @@ dependencies {
         implementation 'org.flywaydb:flyway-database-postgresql'
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.boot:spring-boot-starter-jdbc-test'
+        testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+        testImplementation 'org.springframework.boot:spring-boot-resttestclient'
+        testImplementation 'org.springframework.boot:spring-boot-restclient'
+        testRuntimeOnly 'com.h2database:h2'
 
+        testImplementation platform('org.testcontainers:testcontainers-bom:1.21.4')
         testImplementation 'org.testcontainers:junit-jupiter'
         testImplementation 'org.testcontainers:postgresql'
 
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    }
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests with Testcontainers'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    shouldRunAfter tasks.named('test')
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
 }
