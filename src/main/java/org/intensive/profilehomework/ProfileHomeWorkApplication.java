@@ -9,5 +9,4 @@ public class ProfileHomeWorkApplication {
     public static void main(String[] args) {
         SpringApplication.run(ProfileHomeWorkApplication.class, args);
     }
-
 }

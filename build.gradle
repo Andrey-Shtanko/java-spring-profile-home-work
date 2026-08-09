@@ -19,9 +19,22 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+        runtimeOnly 'org.postgresql:postgresql'
+
+        implementation 'org.springframework.boot:spring-boot-starter-flyway'
+        implementation 'org.flywaydb:flyway-database-postgresql'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        testImplementation 'org.testcontainers:junit-jupiter'
+        testImplementation 'org.testcontainers:postgresql'
+
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
 }
 
 tasks.named('test') {
