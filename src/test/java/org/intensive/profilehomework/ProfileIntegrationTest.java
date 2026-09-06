@@ -1,5 +1,8 @@
 package org.intensive.profilehomework;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,26 +46,42 @@ class ProfileIntegrationTest {
     @Test
     void shouldCreateAndReadProfileThroughApplicationLayers() {
         Profile newProfile = new Profile();
+        newProfile.setId(12345);
         newProfile.setFirstName("Grace");
         newProfile.setLastName("Hopper");
         newProfile.setEmail("grace.integration@example.com");
         newProfile.setPhone("+380501234567");
         newProfile.setAvatar("grace.png");
 
-        ResponseEntity<Profile> createResponse = restTemplate.postForEntity(url("/profiles"), newProfile, Profile.class);
+        ResponseEntity<String> createResponse = restTemplate.postForEntity(url("/profiles"), newProfile, String.class);
 
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(createResponse.getBody()).satisfies(profile -> {
-            assertThat(profile.getFirstName()).isEqualTo("Grace");
-            assertThat(profile.getEmail()).isEqualTo("grace.integration@example.com");
+        assertThat(createResponse.getBody()).satisfies(body -> {
+            JsonNode json = readJson(body);
+            assertThat(json.path("id").asInt()).isPositive().isNotEqualTo(12345);
+            assertThat(json.path("firstName").asText()).isEqualTo("Grace");
+            assertThat(json.path("email").asText()).isEqualTo("grace.integration@example.com");
         });
 
-        ResponseEntity<Profile[]> getResponse = restTemplate.getForEntity(url("/profiles"), Profile[].class);
+        ResponseEntity<String> getResponse = restTemplate.getForEntity(url("/profiles"), String.class);
 
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(getResponse.getBody())
-                .extracting(Profile::getEmail)
+        JsonNode profiles = readJson(getResponse.getBody());
+        assertThat(profiles.isArray()).isTrue();
+        assertThat(profiles)
+                .extracting(json -> json.path("email").asText())
                 .contains("grace.integration@example.com");
+        assertThat(profiles)
+                .extracting(json -> json.path("id").asInt())
+                .doesNotContain(12345);
+    }
+
+    private JsonNode readJson(String body) {
+        try {
+            return new ObjectMapper().readTree(body);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Invalid JSON response: " + body, e);
+        }
     }
 
     private String url(String path) {

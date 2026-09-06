@@ -53,29 +53,37 @@ class ProfileControllerTest {
 
     @Test
     void shouldCreateProfile() throws Exception {
+        Profile created = profile(7, "Grace", "Hopper", "grace@example.com");
+        created.setPhone("+380501234567");
+        created.setAvatar("grace.png");
+        when(profileService.saveNewProfile(org.mockito.ArgumentMatchers.any(Profile.class))).thenReturn(created);
+
         mockMvc.perform(post("/profiles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"firstName":"Grace","lastName":"Hopper","email":"grace@example.com","phone":"+380501234567","avatar":"grace.png"}
+                                {"id":123,"firstName":"Grace","lastName":"Hopper","email":"grace@example.com","phone":"+380501234567","avatar":"grace.png"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        {"firstName":"Grace","lastName":"Hopper","email":"grace@example.com","phone":"+380501234567","avatar":"grace.png"}
+                        {"id":7,"firstName":"Grace","lastName":"Hopper","email":"grace@example.com","phone":"+380501234567","avatar":"grace.png"}
                         """));
 
-        verify(profileService).saveNewProfile(org.mockito.ArgumentMatchers.any(Profile.class));
+        verify(profileService).saveNewProfile(org.mockito.ArgumentMatchers.argThat(profile -> profile.getId() == 0));
     }
 
     @Test
     void shouldUpdateProfile() throws Exception {
+        Profile updated = profile(1, "Augusta", "King", "augusta@example.com");
+        when(profileService.updateProfileById(org.mockito.ArgumentMatchers.eq(1), org.mockito.ArgumentMatchers.any(Profile.class))).thenReturn(updated);
+
         mockMvc.perform(put("/profiles/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"firstName":"Augusta","lastName":"King","email":"augusta@example.com"}
+                                {"id":999,"firstName":"Augusta","lastName":"King","email":"augusta@example.com"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        {"firstName":"Augusta","lastName":"King","email":"augusta@example.com"}
+                        {"id":1,"firstName":"Augusta","lastName":"King","email":"augusta@example.com"}
                         """));
 
         verify(profileService).updateProfileById(org.mockito.ArgumentMatchers.eq(1), org.mockito.ArgumentMatchers.any(Profile.class));

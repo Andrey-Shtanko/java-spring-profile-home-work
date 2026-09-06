@@ -1,10 +1,9 @@
 package org.intensive.profilehomework;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class Profile {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private int id;
     private String firstName;
     private String lastName;

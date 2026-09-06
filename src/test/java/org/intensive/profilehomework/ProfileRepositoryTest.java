@@ -59,11 +59,13 @@ class ProfileRepositoryTest {
 
     @Test
     void shouldSaveNewProfile() {
-        profileRepository.saveNewProfile("Grace", "Hopper", "grace@example.com", null, "grace.png");
+        Profile saved = profileRepository.saveNewProfile("Grace", "Hopper", "grace@example.com", null, "grace.png");
 
-        assertThat(profileRepository.getAllProfiles())
-                .extracting(Profile::getEmail)
-                .containsExactlyInAnyOrder("ada@example.com", "grace@example.com");
+        assertThat(saved.getId()).isPositive();
+
+        Profile fetched = profileRepository.getProfileById(saved.getId());
+        assertThat(fetched.getFirstName()).isEqualTo("Grace");
+        assertThat(fetched.getEmail()).isEqualTo("grace@example.com");
     }
 
     @Test

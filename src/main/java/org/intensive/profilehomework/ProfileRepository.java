@@ -2,8 +2,11 @@ package org.intensive.profilehomework;
 
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -42,9 +45,28 @@ public class ProfileRepository {
         }, id);
     }
 
-    public void saveNewProfile (String firstName, String lastName, String email, String phone, String avatar) {
-        jdbcTemplate.update("INSERT INTO profiles (first_name, last_name, email, phone, avatar) VALUES (?, ?, ?, ?, ?)",
-                firstName, lastName, email, phone, avatar);
+    public Profile saveNewProfile(String firstName, String lastName, String email, String phone, String avatar) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO profiles (first_name, last_name, email, phone, avatar) VALUES (?, ?, ?, ?, ?)",
+                    new String[]{"id"});
+            ps.setString(1, firstName);
+            ps.setString(2, lastName);
+            ps.setString(3, email);
+            ps.setString(4, phone);
+            ps.setString(5, avatar);
+            return ps;
+        }, keyHolder);
+
+        Profile profile = new Profile();
+        profile.setId(keyHolder.getKey().intValue());
+        profile.setFirstName(firstName);
+        profile.setLastName(lastName);
+        profile.setEmail(email);
+        profile.setPhone(phone);
+        profile.setAvatar(avatar);
+        return profile;
     }
 
     public void updateProfileById (int id, String firstName, String lastName, String email, String phone, String avatar) {

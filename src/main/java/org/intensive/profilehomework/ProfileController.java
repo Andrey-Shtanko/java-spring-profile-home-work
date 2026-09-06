@@ -32,14 +32,12 @@ public class ProfileController {
 
     @PostMapping("/profiles")
     public Profile saveProfile(@RequestBody Profile profile) {
-        profileService.saveNewProfile(profile);
-        return profile;
+        return profileService.saveNewProfile(profile);
     }
 
     @PutMapping("/profiles/{id}")
     public Profile updateProfile(@RequestBody Profile profile, @PathVariable int id) {
-        profileService.updateProfileById(id, profile);
-        return profile;
+        return profileService.updateProfileById(id, profile);
     }
 
     @DeleteMapping("/profiles/{id}")
